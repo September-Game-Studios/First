@@ -1,5 +1,5 @@
 {
-    "name": "InputPlayer",
+    "name": "InputMaster",
     "maps": [
         {
             "name": "Player",
@@ -7,9 +7,9 @@
             "actions": [
                 {
                     "name": "Movement",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "6febb3ac-5460-4174-a6cc-f7a51e1349a5",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": ""
                 },
@@ -18,6 +18,14 @@
                     "type": "Button",
                     "id": "74f9f87c-d104-4d7b-a464-66ea5f75ee27",
                     "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Look",
+                    "type": "Value",
+                    "id": "535fb5b6-9f4c-44c1-9e38-52c361acf947",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": ""
                 }
@@ -137,7 +145,7 @@
                     "name": "",
                     "id": "837fd626-6b06-4e50-8f10-b2c8d327b918",
                     "path": "<Keyboard>/space",
-                    "interactions": "",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "Keyboard & mouse",
                     "action": "Jump",
@@ -152,6 +160,17 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a778a800-c9f8-4417-8b4d-f99b4cd94827",
+                    "path": "<Pointer>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard & mouse",
+                    "action": "Look",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

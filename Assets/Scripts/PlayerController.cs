@@ -5,31 +5,41 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public InputMaster controls;
+    public CharacterController controller;
+    public float speed = 6f;
+    public float turnSmoothTime = 0.1f;
+    public Transform cam;
 
-    private void Awake()
+    private InputMaster controls;
+    private Vector2 direction;
+    private float turnSmoothVelocity;
+
+    
+
+    public void OnMovement(InputAction.CallbackContext context)
     {
-        controls.Player.Jump.performed += _ => Jump();
+        this.direction = context.ReadValue<Vector2>();
+        if (context.performed)
+        {
+            Debug.Log("MOVE: " + context.ReadValue<Vector2>());
+        }
     }
 
-    public void Jump()
+    public void OnJump(InputAction.CallbackContext context)
     {
-        Debug.Log("We jumped!");
+        Debug.Log("JUMP");
     }
 
-    private void OnEnable()
+    private void Update()
     {
-        controls.Enable();
-    }
+        if (direction.magnitude >= 0.1f)
+        {
+            float targetAngle = Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+            transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-    private void OnDisable()
-    {
-        controls.Disable();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+            Vector3 moveDirection = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
+            controller.Move(moveDirection * speed * Time.deltaTime);
+        }
     }
 }
