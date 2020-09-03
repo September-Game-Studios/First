@@ -67,6 +67,9 @@ MonoBehaviour:
   turnSmoothTime: 0.1
   jumpHeight: 1
   gravityValue: -9.81
+  dashSpeed: 100
+  dashDuration: 0.3
+  dashCooldown: 2
 --- !u!1 &8832325247249907221
 GameObject:
   m_ObjectHideFlags: 0

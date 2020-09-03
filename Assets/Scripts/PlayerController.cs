@@ -13,12 +13,17 @@ public class PlayerController : MonoBehaviour, InputMaster.IPlayerActions
     private InputMaster controls;
     private CharacterController controller;
     private Vector2 direction;
-    private float turnSmoothVelocity;
     private Vector3 playerVelocity;
-    private bool jumped = false;
-    
-    private float verticalForce = 0.0f;
+    private float turnSmoothVelocity;
     private bool groundedPlayer;
+
+    // Dashing
+    public float dashSpeed = 12f;
+    public float dashDuration = 0.5f;
+    private float dashDurationTimer = 0.0f;
+    public float dashCooldown = 2.0f;
+    private float dashCooldownTimer = 0.0f;
+    private bool isDashing = false;
 
     private void Awake()
     {
@@ -39,20 +44,29 @@ public class PlayerController : MonoBehaviour, InputMaster.IPlayerActions
 
     public void OnMovement(InputAction.CallbackContext context)
     {
-        this.direction = context.ReadValue<Vector2>();
-        if (context.performed)
+        if (!isDashing)
         {
-            Debug.Log("MOVE: " + context.ReadValue<Vector2>());
+            this.direction = context.ReadValue<Vector2>();
         }
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (context.performed && groundedPlayer)
+        if (context.performed && groundedPlayer && !isDashing)
         {
             playerVelocity.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
             controller.Move(playerVelocity * Time.deltaTime);
         }        
+    }
+
+    public void OnDash(InputAction.CallbackContext context)
+    {
+        if (context.performed && !isDashing && dashCooldownTimer == 0.0f && direction.magnitude >= 0.1f)
+        {
+            Debug.Log("DASH");
+            isDashing = true;
+            dashDurationTimer = 0.0f;
+        }
     }
 
     void Update()
@@ -64,12 +78,32 @@ public class PlayerController : MonoBehaviour, InputMaster.IPlayerActions
 
         if (direction.magnitude >= 0.1f)
         {
+            float currentSpeed = isDashing ? dashSpeed : speed;
             float targetAngle = Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg;
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
             Vector3 moveDirection = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
-            controller.Move(moveDirection * speed * Time.deltaTime);
+            controller.Move(moveDirection * currentSpeed * Time.deltaTime);
+        }
+
+        if (dashCooldownTimer > 0.0f)
+        {
+            dashCooldownTimer -= Time.deltaTime;
+            if (dashCooldownTimer <= 0.0f)
+            {
+                dashCooldownTimer = 0.0f;
+            }
+        }
+
+        if (isDashing)
+        {
+            dashDurationTimer += Time.deltaTime;
+            if (dashDurationTimer >= dashDuration)
+            {
+                isDashing = false;
+                dashCooldownTimer = dashCooldown;
+            }
         }
     }
     private void FixedUpdate()
