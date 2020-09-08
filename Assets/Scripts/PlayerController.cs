@@ -35,26 +35,29 @@ public class PlayerController : MonoBehaviour, InputMaster.IPlayerActions
     [System.Serializable]
     public class Grab
     {
+        public Transform hands;
         [HideInInspector]
         public GrabAreaController area;
-        public bool isHolding = false;
-        public GameObject held;
 
-        public void Hold(GameObject item)
+        private GameObject heldItem = null;
+
+        public void Hold(GameObject item = null)
         {
-            held = item;
-            isHolding = true;
-            Rigidbody rb = held.GetComponent<Rigidbody>();
-            rb.isKinematic = true;
+            item = (item == null) ? area.closest : item;
+
+            heldItem = item;
+            heldItem.GetComponent<Rigidbody>().isKinematic = true;
+            heldItem.transform.SetParent(hands);
         }
 
         public void Drop()
         {
-            held.GetComponent<Rigidbody>().isKinematic = false;
-            held.transform.SetParent(null);
-            held = null;
-            isHolding = false;
+            heldItem.GetComponent<Rigidbody>().isKinematic = false;
+            heldItem.transform.SetParent(null);
+            heldItem = null;
         }
+
+        public bool isHolding { get => heldItem != null; }
     }
 
     public Grab grab;
@@ -111,20 +114,11 @@ public class PlayerController : MonoBehaviour, InputMaster.IPlayerActions
         {
             if (grab.isHolding)
             {
-                // Let go of item
-                Debug.Log("Drop!");
                 grab.Drop();
             }
-            else
+            else if (grab.area.canGrab)
             {
-                // Check collider
-                if (grab.area.canGrab)
-                {
-                    Debug.Log("Grab!");
-                    Debug.Log(grab.area.closest.name);
-                    grab.Hold(grab.area.closest);
-                    grab.held.transform.parent = transform;
-                }
+                grab.Hold();
             }
         }
     }
