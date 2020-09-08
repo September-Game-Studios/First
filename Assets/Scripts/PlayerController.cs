@@ -31,12 +31,41 @@ public class PlayerController : MonoBehaviour, InputMaster.IPlayerActions
         public bool active = false;
     }
     public Dash dash;
+
+    [System.Serializable]
+    public class Grab
+    {
+        [HideInInspector]
+        public GrabAreaController area;
+        public bool isHolding = false;
+        public GameObject held;
+
+        public void Hold(GameObject item)
+        {
+            held = item;
+            isHolding = true;
+            Rigidbody rb = held.GetComponent<Rigidbody>();
+            rb.isKinematic = true;
+        }
+
+        public void Drop()
+        {
+            held.GetComponent<Rigidbody>().isKinematic = false;
+            held.transform.SetParent(null);
+            held = null;
+            isHolding = false;
+        }
+    }
+
+    public Grab grab;
     
     private void Awake()
     {
         controller = gameObject.GetComponent<CharacterController>();
         controls = new InputMaster();
         controls.Player.SetCallbacks(this);
+
+        grab.area = gameObject.GetComponentInChildren<GrabAreaController>();
     }
 
     public void OnEnable()
@@ -73,6 +102,30 @@ public class PlayerController : MonoBehaviour, InputMaster.IPlayerActions
             Debug.Log("DASH");
             dash.active = true;
             dash.durationTimer = 0.0f;
+        }
+    }
+
+    public void OnGrab(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            if (grab.isHolding)
+            {
+                // Let go of item
+                Debug.Log("Drop!");
+                grab.Drop();
+            }
+            else
+            {
+                // Check collider
+                if (grab.area.canGrab)
+                {
+                    Debug.Log("Grab!");
+                    Debug.Log(grab.area.closest.name);
+                    grab.Hold(grab.area.closest);
+                    grab.held.transform.parent = transform;
+                }
+            }
         }
     }
 
