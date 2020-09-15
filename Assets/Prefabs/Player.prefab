@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 485923175}
   - component: {fileID: 485923178}
-  - component: {fileID: 485923177}
   - component: {fileID: 485923176}
   - component: {fileID: 485923179}
   m_Layer: 0
@@ -42,19 +41,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 485923174}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!135 &485923177
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 485923174}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &485923176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,7 +233,7 @@ MonoBehaviour:
     cooldownTimer: 0
     active: 0
   grab:
-    hands: {fileID: 0}
+    hands: {fileID: 8102653834509592891}
     area: {fileID: 0}
 --- !u!114 &3700148459472567638
 MonoBehaviour:

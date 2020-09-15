@@ -2,15 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Collider))]
 public class GrabAreaController : MonoBehaviour
 {
-    private SphereCollider area;
-
-    private void Awake()
-    {
-        area = GetComponent<SphereCollider>();
-    }
 
     public bool canGrab
     {
@@ -24,7 +17,7 @@ public class GrabAreaController : MonoBehaviour
     {
         get
         {
-            return Physics.OverlapSphere(transform.position, area.radius, 1 << LayerMask.NameToLayer("Grabbable"));
+            return Physics.OverlapSphere(transform.position, 0.5f, 1 << LayerMask.NameToLayer("Grabbable"));
         }
     }
 

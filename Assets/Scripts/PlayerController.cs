@@ -96,6 +96,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnGrab()
     {
+        Debug.Log(grab.area.canGrab);
         if (grab.isHolding)
         {
             grab.Drop();
