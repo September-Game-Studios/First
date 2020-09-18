@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour, InputMaster.IPlayerActions
+public class PlayerController : MonoBehaviour
 {
     public float speed = 6f;
     public float turnSmoothTime = 0.1f;
     public float jumpHeight = 1.0f;
     public float gravityValue = -9.81f;
 
-    private InputMaster controls;
     private CharacterController controller;
     private Vector2 direction;
     private Vector3 playerVelocity;
@@ -31,48 +30,80 @@ public class PlayerController : MonoBehaviour, InputMaster.IPlayerActions
         public bool active = false;
     }
     public Dash dash;
+
+    [System.Serializable]
+    public class Grab
+    {
+        public Transform hands;
+        [HideInInspector]
+        public GrabAreaController area;
+
+        private GameObject heldItem = null;
+
+        public void Hold(GameObject item = null)
+        {
+            item = (item == null) ? area.closest : item;
+
+            heldItem = item;
+            heldItem.GetComponent<Rigidbody>().isKinematic = true;
+            heldItem.transform.SetParent(hands);
+        }
+
+        public void Drop()
+        {
+            heldItem.GetComponent<Rigidbody>().isKinematic = false;
+            heldItem.transform.SetParent(null);
+            heldItem = null;
+        }
+
+        public bool isHolding { get => heldItem != null; }
+    }
+
+    public Grab grab;
     
     private void Awake()
     {
         controller = gameObject.GetComponent<CharacterController>();
-        controls = new InputMaster();
-        controls.Player.SetCallbacks(this);
+        grab.area = gameObject.GetComponentInChildren<GrabAreaController>();
     }
 
-    public void OnEnable()
-    {
-        controls.Player.Enable();
-    }
-
-    public void OnDisable()
-    {
-        controls.Player.Disable();
-    }
-
-    public void OnMovement(InputAction.CallbackContext context)
+    public void OnMovement(InputValue value)
     {
         if (!dash.active)
         {
-            this.direction = context.ReadValue<Vector2>();
+            this.direction = value.Get<Vector2>();
         }
     }
 
-    public void OnJump(InputAction.CallbackContext context)
+    public void OnJump()
     {
-        if (context.performed && groundedPlayer && !dash.active)
+        if ( groundedPlayer && !dash.active)
         {
             playerVelocity.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
             controller.Move(playerVelocity * Time.deltaTime);
         }        
     }
 
-    public void OnDash(InputAction.CallbackContext context)
+    public void OnDash()
     {
-        if (context.performed && !dash.active && dash.cooldownTimer == 0.0f && direction.magnitude >= 0.1f)
+        if (!dash.active && dash.cooldownTimer == 0.0f && direction.magnitude >= 0.1f)
         {
             Debug.Log("DASH");
             dash.active = true;
             dash.durationTimer = 0.0f;
+        }
+    }
+
+    public void OnGrab()
+    {
+        Debug.Log(grab.area.canGrab);
+        if (grab.isHolding)
+        {
+            grab.Drop();
+        }
+        else if (grab.area.canGrab)
+        {
+            grab.Hold();
         }
     }
 
