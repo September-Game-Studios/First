@@ -60,11 +60,14 @@ public class PlayerController : MonoBehaviour
     }
 
     public Grab grab;
+
+    public UseAreaController use;
     
     private void Awake()
     {
         controller = gameObject.GetComponent<CharacterController>();
         grab.area = gameObject.GetComponentInChildren<GrabAreaController>();
+        use = gameObject.GetComponentInChildren<UseAreaController>();
     }
 
     public void OnMovement(InputValue value)
@@ -77,7 +80,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump()
     {
-        if ( groundedPlayer && !dash.active)
+        if (groundedPlayer && !dash.active)
         {
             playerVelocity.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue);
             controller.Move(playerVelocity * Time.deltaTime);
@@ -104,6 +107,17 @@ public class PlayerController : MonoBehaviour
         else if (grab.area.canGrab)
         {
             grab.Hold();
+        }
+    }
+
+    public void OnUse()
+    {
+        if (use.canUse)
+        {
+            Debug.Log("USE");
+            GameObject go = use.closest;
+            UsableController usableController = go.GetComponent<UsableController>();
+            usableController.Use();
         }
     }
 
