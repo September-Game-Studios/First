@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
     private float turnSmoothVelocity;
     private bool groundedPlayer;
 
+	private ReachController reach;
+
     [System.Serializable]
     public class Dash
     {
@@ -34,15 +36,17 @@ public class PlayerController : MonoBehaviour
     [System.Serializable]
     public class Grab
     {
+		static readonly int Layer = 9;
+
         public Transform hands;
-        [HideInInspector]
-        public GrabAreaController area;
+		[HideInInspector]
+		public ReachController reach;
 
         private GameObject heldItem = null;
 
         public void Hold(GameObject item = null)
         {
-            item = (item == null) ? area.closest : item;
+            item = (item == null) ? reach.GetClosest(Layer) : item;
 
             heldItem = item;
             heldItem.GetComponent<Rigidbody>().isKinematic = true;
@@ -56,15 +60,29 @@ public class PlayerController : MonoBehaviour
             heldItem = null;
         }
 
+		public bool CanGrab
+		{
+			get => reach.CanReach(Layer);
+		}
+
         public bool isHolding { get => heldItem != null; }
     }
 
     public Grab grab;
+
+	// Drag attributes
+	GameObject cargo = null;
+
+	private bool holdingCargo
+	{
+		get => cargo != null;
+	}
     
     private void Awake()
     {
         controller = gameObject.GetComponent<CharacterController>();
-        grab.area = gameObject.GetComponentInChildren<GrabAreaController>();
+		reach = gameObject.GetComponentInChildren<ReachController>();
+		grab.reach = reach;
     }
 
     public void OnMovement(InputValue value)
@@ -96,16 +114,43 @@ public class PlayerController : MonoBehaviour
 
     public void OnGrab()
     {
-        Debug.Log(grab.area.canGrab);
+		/*Debug.Log(grab.CanGrab);
         if (grab.isHolding)
         {
             grab.Drop();
         }
-        else if (grab.area.canGrab)
+        else if (grab.CanGrab)
         {
             grab.Hold();
-        }
+        }*/
+		// DRAG
+		
+		int layer = LayerMask.NameToLayer("Cargo");
+		if (holdingCargo)
+		{
+			// let go
+		}
+		else
+		{
+			if (reach.CanReach(layer))
+			{Debug.Log("DRAG");
+				// Cargo in reach
+				Hold(layer);
+			}
+		}
     }
+
+	private void Hold(int layer)
+	{
+		cargo = reach.GetClosest(layer);
+		cargo.GetComponent<Rigidbody>().isKinematic = true;
+		cargo.transform.SetParent(grab.hands);
+	}
+
+	private void LetGo()
+	{
+
+	}
 
     void Update()
     {
